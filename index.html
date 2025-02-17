@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Funcionários</title>
+    <!-- usar o css  -->
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Título da página -->
+    <h2>Cadastro de Funcionários</h2>
+
+    <div class="form-container">
+        <!-- ID do funcionário -->
+        <label for="id">ID:</label>
+        <input type="text" id="id" required><br><br>
+
+        <!-- nome do colaborador -->
+        <label for="colaborador">Colaborador:</label>
+        <input type="text" id="colaborador" required><br><br>
+
+        <!-- data de nascimento do funcionário -->
+        <label for="dataNascimento">Data de Nascimento:</label>
+        <input type="date" id="dataNascimento" required><br><br>
+
+        <!-- Campo para o cargo do funcionário -->
+        <label for="cargo">Cargo:</label>
+        <input type="text" id="cargo" required><br><br>
+
+        <!-- Botões para ações: Cadastrar, Consultar, Excluir e Alterar -->
+        <div class="buttons-container">
+            <button onclick="cadastrar()">Cadastrar</button>
+            <button onclick="consultar()">Consultar</button>
+            <button onclick="excluir()">Excluir</button>
+            <button onclick="alterar()">Alterar</button>
+        </div>
+    </div>
+
+    <!-- Tabela para exibir os funcionários cadastrados -->
+    <table id="tabelaFuncionarios">
+        <thead>
+            <tr>
+                <!-- Cabeçalhos das colunas da tabela -->
+                <th>ID</th>
+                <th>Colaborador</th>
+                <th>Data de Nascimento</th>
+                <th>Cargo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aqui as informações dos funcionários serão preenchidas dinamicamente -->
+        </tbody>
+    </table>
+
+    <script>
+        // Variável que armazena os funcionários cadastrados
+        let funcionarios = [];
+
+        // Função para validar a data de nascimento
+        function validarDataNascimento(data) {
+            const hoje = new Date(); // Data atual
+            const dataNasc = new Date(data); 
+            const idadeMaxima = 120; // Definindo a idade máxima permitida
+            
+            // Verificando se a data de nascimento é no futuro
+            if (dataNasc > hoje) {
+                return "A data de nascimento não pode ser no futuro!";
+            }
+            // Verificando se a idade do funcionário excede a idade máxima
+            if (hoje.getFullYear() - dataNasc.getFullYear() > idadeMaxima) {
+                return `A idade máxima permitida é ${idadeMaxima} anos!`;
+            }
+            return ""; // Retorna vazio se não houver erro
+        }
+
+        // Função para cadastrar um novo funcionário
+        function cadastrar() {
+            const id = document.getElementById("id").value;
+            const colaborador = document.getElementById("colaborador").value;
+            const dataNascimento = document.getElementById("dataNascimento").value;
+            const cargo = document.getElementById("cargo").value;
+
+            // Verificando se todos os campos foram preenchidos
+            if (!id || !colaborador || !dataNascimento || !cargo) {
+                alert("Por favor, preencha todos os campos!");
+                return;
+            }
+            
+            // Verificando se o ID já foi cadastrado
+            if (funcionarios.some(f => f[0] === id)) {
+                alert("ID já cadastrado! Escolha outro.");
+                return;
+            }
+            
+            // Validando a data de nascimento
+            const erroData = validarDataNascimento(dataNascimento);
+            if (erroData) {
+                alert(erroData);
+                return;
+            }
+            
+            // Adicionando o novo funcionário ao matriz
+            funcionarios.push([id, colaborador, dataNascimento, cargo]);
+            alert("Funcionário cadastrado com sucesso!");
+            atualizarTabela(); // Atualiza a tabela
+            limparCampos(); // Limpa os campos depois do cadastro
+        }
+
+        // Função para consultar e atualizar a tabela de funcionários
+        function consultar() {
+            atualizarTabela();
+        }
+
+        // Função para excluir um funcionário
+        function excluir() {
+            // Pedindo o ID do funcionário
+            const id = prompt("Digite o ID do funcionário a ser excluído:");
+            if (id) {
+                // encontrando o funcionário pelo ID
+                const index = funcionarios.findIndex(f => f[0] === id);
+                if (index !== -1) {
+                    // Removendo o funcionário do matriz
+                    funcionarios.splice(index, 1);
+                    alert("Funcionário excluído com sucesso!");
+                    atualizarTabela(); // Atualizando a tabela
+                } else {
+                    alert("Funcionário não encontrado!");
+                }
+            }
+        }
+
+        // Função para alterar os dados de um funcionário
+        function alterar() {
+            // Pedindo o ID do funcionário 
+            const id = prompt("Digite o ID do funcionário a ser alterado:");
+            if (id) {
+                // Encontrando o funcionário no matriz
+                const index = funcionarios.findIndex(f => f[0] === id);
+                if (index !== -1) {
+                    // Solicitando novos dados para o funcionário
+                    const novoId = prompt("Novo ID do funcionário:", funcionarios[index][0]);
+                    if (novoId !== id && funcionarios.some(f => f[0] === novoId)) {
+                        alert("Este ID já está em uso. Escolha outro!");
+                        return;
+                    }
+                    
+                    const novoColaborador = prompt("Novo nome do colaborador:", funcionarios[index][1]);
+                    if (!novoColaborador) {
+                        alert("O nome do colaborador não pode ser vazio!");
+                        return;
+                    }
+
+                    const novaDataNascimento = prompt("Nova data de nascimento (AAAA-MM-DD):", funcionarios[index][2]);
+                    const erroData = validarDataNascimento(novaDataNascimento);
+                    if (erroData) {
+                        alert(erroData);
+                        return;
+                    }
+
+                    const novoCargo = prompt("Novo cargo:", funcionarios[index][3]);
+                    if (!novoCargo) {
+                        alert("O cargo não pode ser vazio!");
+                        return;
+                    }
+                    
+                    // Atualizando os dados do funcionário no matriz
+                    funcionarios[index] = [novoId, novoColaborador, novaDataNascimento, novoCargo];
+                    alert("Dados do funcionário alterados com sucesso!");
+                    atualizarTabela(); // Atualizando a tabela
+                } else {
+                    alert("Funcionário não encontrado!");
+                }
+            }
+        }
+
+        // Função para atualizar a tabela com os funcionários cadastrados
+        function atualizarTabela() {
+            const tabela = document.getElementById("tabelaFuncionarios").getElementsByTagName("tbody")[0];
+            tabela.innerHTML = ""; // Limpando a tabela antes de atualizar
+            funcionarios.forEach(funcionario => {
+                const row = tabela.insertRow(); 
+                funcionario.forEach(dado => {
+                    const cell = row.insertCell(); 
+                    cell.textContent = dado; // Adicionando os dados do funcionário 
+                });
+            });
+        }
+
+        // Função para limpar os campos após o cadastro ou alteração
+        function limparCampos() {
+            document.getElementById("id").value = "";
+            document.getElementById("colaborador").value = "";
+            document.getElementById("dataNascimento").value = "";
+            document.getElementById("cargo").value = "";
+        }
+    </script>
+</body>
+</html>
